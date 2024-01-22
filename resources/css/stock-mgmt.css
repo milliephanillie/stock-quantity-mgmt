@@ -1,0 +1,81 @@
+input.required-value-missing-notice {
+    border: 1px solid #b32d2e;
+}
+
+.pscaff--page-title-wrapper h1,
+.pscaff_content_wrapper form h2 {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pscaff--page-title-wrapper h1 {
+    margin-bottom: 20px;
+}
+
+.pscaff--page-title-wrapper h1 span  {
+    margin-right: 10px;
+}
+
+.pscaff--page-title-wrapper h1:before {
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+}
+
+.pscaff_content_wrapper form h2:before {
+    background-size: 30px 30px;
+    width: 30px;
+    height: 30px;
+}
+
+/*.widefat tr.header-row {*/
+/*	border-bottom: 1px solid #e6e6e6;*/
+/*}*/
+
+.pscaff-table tbody tr:nth-child(odd) {
+	background-color: #f6f7f7;
+}
+
+.pscaff-table tbody td {
+	vertical-align: middle;
+}
+
+.left-cell,
+.widefat th.left-cell {
+	text-align: left;
+}
+.center-cell,
+.widefat th.center-cell {
+	text-align: center;
+}
+.right-cell,
+.widefat th.right-cell {
+	text-align: right;
+}
+
+.pscaff-table tbody input[type=number] {
+	border-radius: 5px;
+	padding: 3px 5px;
+	text-align: center;
+	width: 150px;
+}
+
+.pscaff-table td.column-thumb,
+.pscaff-table th.column-thumb {
+	width: 60px;
+	white-space: nowrap
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+	opacity: 1;
+}
+
+p.submit {
+	text-align: right !important;
+}
+
+p.submit input[type=submit] {
+	padding: 8px 30px;
+}

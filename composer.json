@@ -1,0 +1,25 @@
+{
+    "name": "philip/stock-quantity-mgmt",
+    "description": "WordPress plugin for stock quantity management exercise.",
+    "type": "wordpress-plugin",
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "require-dev": {
+        "10up/wp_mock": "^0.3.0",
+        "wp-phpunit/wp-phpunit": "^6.3",
+        "yoast/phpunit-polyfills": "^2.0"
+    },
+    "license": "GPL-2.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "StockMGMT\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Philip Rudy",
+            "email": "me@philiparudy.com"
+        }
+    ]
+}
