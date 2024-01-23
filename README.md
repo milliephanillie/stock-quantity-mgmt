@@ -41,6 +41,7 @@ Here are the directions for the dockerized version:
   * Port: 3306
   * User: root
   * Password: root
+* The SQL file and the wordpress importer are both located in this repo in the root folder.
 
 #### Screenshots
 ![Manage Stock Admin UI](/resources/images/screenshot-admin.png?raw=true "Optional Title")
