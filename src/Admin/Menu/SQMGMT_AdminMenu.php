@@ -271,7 +271,7 @@ class SQMGMT_AdminMenu
 					<div class="row-actions">
 						<span class="id">ID: '.esc_attr($product['id']).'</span>
 						<span class="edit">
-						<a href="'.esc_attr($product['edit_link']).'" aria-label="Edit “' . esc_attr($product['name']) . '”">Edit</a>
+						<a href="'.esc_attr($product['edit_link']).'">Edit</a>
 						</span>
 					</div>
 
