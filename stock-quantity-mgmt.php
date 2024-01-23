@@ -34,17 +34,11 @@ use StockMGMT\Options\SQMGMT_Options;
 class SQMGTM_Manage_Stock {
 	public function __construct() {
 		add_action('admin_init', [$this, 'check_required_plugin']);
-		add_action('admin_init', [$this, 'register_install_bg_task']);
-	}
-
-	public function register_install_bg_task() {
-		$demoImporter = new SQMGMT_DemoImporter();
-		add_action('admin_post_create_demo_data', [$demoImporter,'install_demo_data']);
 	}
 
 	public function check_required_plugin() {
-		$admin_notices = SQMGMT_Options::get_option('admin_notices');
-		if($admin_notices['required_plugin_missing']) {
+		$admin_notices = SQMGMT_Options::get_option('admin_notices', null);
+		if(is_array($admin_notices) && isset($admin_notices['required_plugin_missing']) && $admin_notices['required_plugin_missing']) {
 			add_action('admin_notices', [$this, 'required_plugins']);
 
 			deactivate_plugins(plugin_basename( STOCKMGMT_PLUGIN ));
@@ -67,30 +61,12 @@ class SQMGTM_Manage_Stock {
 
 		printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 	}
-
-	public static function create_demo_data() {
-		$url = 'http://host.docker.internal:8080';
-
-		$response = wp_remote_post($url, array(
-			'body' => array(
-				'action' => 'create_demo_data',
-				'create_demo_data_nonce' => wp_create_nonce('create-demo-data'),
-			),
-		));
-
-		if(is_wp_error($response)) {
-			error_log(print_r($url, true));
-			error_log(print_r($response, true));
-		}
-	}
 }
 
 function activate_manage_stock() {
 	if(!class_exists(WooCommerce::class)) {
 		error_log(print_r('WooCommerce is required.', true));
 		SQMGMT_Options::update_option('admin_notices', ['required_plugin_missing' => true]);
-	} else {
-		error_log(print_r("plugin activated"));
 	}
 }
 

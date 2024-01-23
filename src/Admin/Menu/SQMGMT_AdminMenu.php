@@ -18,6 +18,8 @@ class SQMGMT_AdminMenu
 
     private $settings;
 
+	private $version;
+
     /**
      * Schema, such as max character count, for our options
      *
@@ -97,24 +99,28 @@ class SQMGMT_AdminMenu
      * @return mixed
      */
 	function save_post(array $input) {
-		$use_demo_data = $this->use_demo_data ?? null;
-
-		if($use_demo_data && intval($use_demo_data) === 1) {
-			$products = $this->settings['demo_data'] ?? null;
-		} else {
-			$products = $input['products'] ?? null;
-		}
+		$products = $input['products'] ?? null;
 
 		if($products) {
 			foreach ($products as $product_id => $product_meta) {
 				$product_id = intval($product_id);
 				$current_stock_quantity = intval($product_meta['current_stock_quantity']);
 				$stock_quantity = intval($product_meta['stock_quantity']);
+				$manage_stock = $product_meta['manage_stock'];
 
 				$product = wc_get_product($product_id);
 
-				if ($product && $current_stock_quantity !== $stock_quantity) {
+
+				$error_message = null;
+				if ($product && $current_stock_quantity != $stock_quantity) {
 					$result = wc_update_product_stock($product, $stock_quantity);
+
+					$manage_stock = $product->get_manage_stock();
+
+					if(false === $manage_stock) {
+						$error_message = sprintf('You must enable manage stock management for product %s', $product_id);
+					}
+
 
 					if ($result || $result === 0) {
 						add_settings_error(
@@ -124,10 +130,14 @@ class SQMGMT_AdminMenu
 							'updated'
 						);
 					} else {
+						if(empty($error_message)) {
+							$error_message = sprintf('Failed to update stock for product ID %s', $product_id);
+						}
+
 						add_settings_error(
 							'woocommerce_stock',
 							esc_attr('settings_error'),
-							'Failed to update stock for product ID ' . $product_id,
+							$error_message,
 							'error'
 						);
 					}
@@ -163,14 +173,19 @@ class SQMGMT_AdminMenu
      */
 
     public function stock_quantities_callback($args) {
+		$cols = "
+			<th class='thumb column-thumb left-cell'>Image</th>
+			<th class='left-cell'>Product Name</th>
+			<th class='center-cell'>Current Stock</th>
+			<th class='enable-stock center-cell'>Manage Stock</th>
+			<th class='right-cell'>Stock Change (-/+)</th>
+		";
+
 		echo "
 		<table class='pscaff-table pscaff-table--rounded widefat'>
 			<thead>
 				<tr class='header-row'>
-					<th class='thumb column-thumb left-cell'>Image</th>
-					<th class='left-cell'>Product Name</th>
-					<th class='center-cell'>Current Stock</th>
-					<th class='right-cell'>Stock Change (-/+)</th>
+					".$cols."
 				<tr>
 			</thead>
 		";
@@ -180,10 +195,7 @@ class SQMGMT_AdminMenu
 		echo "
 			<tfoot>
 				<tr class='footer-row'>
-					<th class='thumb column-thumb left-cell'>Image</th>
-					<th class='left-cell'>Product Name</th>
-					<th class='center-cell'>Current Stock</th>
-					<th class='right-cell'>Stock Change (-/+)</th>
+					".$cols."
 				<tr>
 			</tfoot>
 		</table>
@@ -191,14 +203,14 @@ class SQMGMT_AdminMenu
     }
 
 	public function render_table_body() {
-		$productModel = new SQMGMT_ProductModel();
+		$productModel = new SQMGMT_ProductModel(null, null);
 		$product_stock_list = $productModel->get_product_stock_list();
 
 		echo '<tbody>';
 
 		if($product_stock_list) {
 			array_walk($product_stock_list, [$this, 'add_text_inputs'], $this->option_name);
-		} elseif(null === $product_stock_list && !$this->use_demo_data) {
+		} elseif(null === $product_stock_list) {
 			$add_product_url = admin_url('post-new.php?post_type=product');
 			echo '
 				<tr>
@@ -211,7 +223,7 @@ class SQMGMT_AdminMenu
 			echo '
 				<tr>
 					<td colspan="4">
-						<span>Something went wrong</a>.</span>
+						<span>Add products.</a>.</span>
 					</td>
 				</tr>
 			';
@@ -229,26 +241,55 @@ class SQMGMT_AdminMenu
 	 * @return void
 	 */
 	public function add_text_inputs($product, $key, $option_name) {
-		$key = 'products';
+		$option_key = 'products';
+		$stock_quantity_string_value = null;
+		$enable_stock_string_value = null;
+		$disabled = '';
+
+		if (null === $product['stock_quantity'] ) {
+			$stock_quantity_string_value = '<span>N/A<span>';
+		} else {
+			$stock_quantity_string_value = '<span>'.$product['stock_quantity'].'</span>';
+		}
+
+		if(!$product['manage_stock_enabled']) {
+			$enable_stock_string_value = 'Enable Manage Stock.';
+
+			$disabled = 'disabled';
+		} else {
+			$enable_stock_string_value = '<span style="color: green">enabled</span>';
+		}
 
 		echo '
             <tr>
 				<td class="thumb column-thumb" data-colname="Image">
-					<img alt="' . esc_attr($product['name']) . '" width="40" height="40" src="'.esc_attr($product['image_url']).'" class="woocommerce-placeholder wp-post-image">
+					<img style="display:block;" alt="' . esc_attr($product['name']) . '" width="40" height="40" src="'.esc_attr($product['image_url']).'" class="woocommerce-placeholder wp-post-image">
 				</td>
+
 				<td class=\'left-cell\'>
 					<span class=\"product-name\"><strong>'.esc_attr($product['name']).'</strong></span>
 					<div class="row-actions">
 						<span class="id">ID: '.esc_attr($product['id']).'</span>
+						<span class="edit">
+						<a href="http://localhost:8080/wp-admin/post.php?post=27&amp;action=edit" aria-label="Edit “Health Gummies”">Edit</a>
+						</span>
 					</div>
-					<input type="hidden" name="'.$this->option_name.'[current_demo_data]" value="' . esc_attr($this->settings['use_demo_data']) . '">
+
 				</td>
+
 				<td class=\'center-cell\'>
-					<span class=\"product-q\">'.esc_attr($product['stock_quantity']).'</span>
-					<input type="hidden" name="'.$this->option_name.'['.$key.'][' . esc_attr($product['id']) . '][current_stock_quantity]" value="' . esc_attr($product['stock_quantity']) . '">
+					<span class=\"product-q\">'.$stock_quantity_string_value.'</span>
+					<input type="hidden" name="'.$this->option_name.'['.$option_key.'][' . esc_attr($product['id']) . '][current_stock_quantity]" value="' . $product['stock_quantity'] . '">
 				</td>
+
+				<td class="enable-stock center-cell">
+					<div>
+						'.$enable_stock_string_value.'
+					</div>
+				</td>
+
 			   <td class="right-cell" style="min-width: 175px;">
-				   <input style="min-width: 105px;" id="" min="0" type="number" name="'.$this->option_name.'['.$key.'][' . esc_attr($product['id']) . '][stock_quantity]" placeholder="" value="' . esc_attr($product['stock_quantity']) . '">
+				   <input style="min-width: 105px;" id="" min="0" type="number" name="'.$this->option_name.'['.$option_key.'][' . esc_attr($product['id']) . '][stock_quantity]" placeholder="" value="' . $product['stock_quantity'] . '" '.$disabled.'>
 			   </td>
             </tr>
     	';

@@ -1,0 +1,1 @@
+{"version":1,"defects":{"Test_ProductModel::test_instance_of_productmodel":4,"Test_ProductModel::test_product_stock_list_returns_array_of_products":4},"times":{"Test_ProductModel::test_instance_of_productmodel":0.029,"Test_ProductModel::test_product_stock_list_returns_array_of_products":0.003,"SampleTest::test_sample":0.002}}

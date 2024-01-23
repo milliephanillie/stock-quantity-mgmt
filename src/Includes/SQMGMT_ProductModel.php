@@ -9,78 +9,70 @@ class SQMGMT_ProductModel {
 			"id" => 15,
 			"name" => "WooCommerce Tote Bag",
 			"stock_quantity" => 5,
-			"image_url" => "WordPress-Totebag.webp"
+			"image_url" => "WordPress-Totebag.webp",
+			"stock_enabled" => null
 		],
 		[
 			"id" => 14,
 			"name" => "Air Pet Filters",
 			"stock_quantity" => 3,
-			"image_url" => "air-pet-filters.webp"
+			"image_url" => "air-pet-filters.webp",
+			"stock_enabled" => null
 		],
 		[
 			"id" => 13,
 			"name" => "Health Gummies",
 			"stock_quantity" => 6,
-			"image_url" => "premium-gummies.jpeg"
+			"image_url" => "premium-gummies.jpeg",
+			"stock_enabled" => null
 		]
 	];
 
-	private $demo_data = null;
+	private $default_args = [
+		'limit' => 10,
+		'orderby' => 'date',
+		'order' => 'DESC',
+	];
 
-	public function __construct() {
-		$this->settings = SQMGMT_Options::get_option('settings') ?? [];
+	private $product_query = null;
 
-		$this->set_use_demo_data();
-		$this->set_demo_data();
-	}
+	private $args;
 
-	public function set_use_demo_data() {
-		$this->use_demo_data = $this->settings['use_demo_data'] ?? null;
-	}
-
-	public function set_demo_data() {
-		if(!$this->settings['products']) {
-			$this->settings['products'] = self::INITIAL_DEMO_DATA;
-			SQMGMT_Options::update_option('settings', $this->settings);
+	public function __construct($args = null, \WC_Product_Query $product_query = null) {
+		$this->args = $args ?? $this->default_args;
+		if(class_exists(\WC_Product_Query::class)) {
+			$this->product_query = $product_query ?: new \WC_Product_Query($this->args);
 		}
-
-		$this->demo_data = array_intersect_key(
-			array_merge(self::INITIAL_DEMO_DATA, $this->settings['products']),
-			self::INITIAL_DEMO_DATA
-		);
 	}
 
 	public function get_product_stock_list() {
-		$products_per_page = 10;
-
-		$args = [
-			'limit' => $products_per_page,
-			'orderby' => 'date',
-			'order' => 'DESC',
-		];
-
 		$product_stock_list = null;
 
-		if(class_exists(\WC_Product_Query::class) && !$this->use_demo_data) {
-			$query = new \WC_Product_Query($args);
-			$products = $query->get_products();
+		if($this->product_query) {
+			$products = $this->product_query->get_products();
 
-			$product_stock_list = [];
+			if(!empty($products)) {
+				$product_stock_list = [];
 
-			foreach ($products as $product) {
-				$image_id = $product->get_image_id();
-				$image_url = null;
-				if($image_id) {
-					$image_url = wp_get_attachment_url($image_id);
+				foreach ($products as $product) {
+					$image_id = $product->get_image_id();
+					$image_url = null;
+					if($image_id) {
+						$image_url = wp_get_attachment_url($image_id);
+					}
+
+					$id = $product->get_id();
+
+					$product_stock_list[] = array(
+						'id' => $id,
+						'name' => $product->get_name(),
+						'edit_link' => get_edit_post_link($id),
+						'stock_quantity' => $product->get_stock_quantity(),
+						'stock_status' => $product->get_stock_status(),
+						'image_url' => $image_url ?? wc_placeholder_img_src(),
+						"manage_stock_enabled" => $product->get_manage_stock(),
+					);
 				}
-
-
-				$product_stock_list[] = array(
-					'id' => $product->get_id(),
-					'name' => $product->get_name(),
-					'stock_quantity' => $product->get_stock_quantity(),
-					'image_url' => $image_url ?? wc_placeholder_img_src(),
-				);
 			}
 		}
 

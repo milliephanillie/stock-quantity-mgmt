@@ -53,6 +53,11 @@ input.required-value-missing-notice {
 .widefat th.right-cell {
 	text-align: right;
 }
+.enable-stock,
+.widefat th.enable-stock,
+.widefat td.enable-stock {
+	width: 100px;
+}
 
 .pscaff-table tbody input[type=number] {
 	border-radius: 5px;
