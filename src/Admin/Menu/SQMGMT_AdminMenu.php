@@ -271,7 +271,7 @@ class SQMGMT_AdminMenu
 					<div class="row-actions">
 						<span class="id">ID: '.esc_attr($product['id']).'</span>
 						<span class="edit">
-						<a href="http://localhost:8080/wp-admin/post.php?post=27&amp;action=edit" aria-label="Edit “Health Gummies”">Edit</a>
+						<a href="'.esc_attr($product['edit_link']).'" aria-label="Edit “Health Gummies”">Edit</a>
 						</span>
 					</div>
 
