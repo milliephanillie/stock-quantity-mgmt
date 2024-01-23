@@ -1,4 +1,4 @@
-# Stock Quanity Management WordPress Plugin Exercise
+# WooCommerce Storefront Developer Exercise
 
 A simple plugin to manage the stock quantity changes in a bulk
 fashion.
@@ -41,3 +41,6 @@ Here are the directions for the dockerized version:
   * Port: 3306
   * User: root
   * Password: root
+
+#### Screenshots
+![Manage Stock Admin UI](/resources/images/screenshot-admin.png?raw=true "Optional Title")
