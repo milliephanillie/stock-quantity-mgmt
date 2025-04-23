@@ -1,0 +1,17 @@
+
+.otslr-nice-select {
+    width: 100%;
+    max-width: 767px;
+    height: 48px;
+    min-height: 48px;
+    font-size: 18px;
+}
+
+.select2-container .select2-choice {
+    padding: 16px 10px;
+    width: 100%;
+    max-width: 767px;
+    height: 48px;
+    min-height: 48px;
+    font-size: 18px;
+}
